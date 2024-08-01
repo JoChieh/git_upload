@@ -11,5 +11,4 @@ update MIAOLI_SHELTER
 /*5-2*/
 delete from MIAOLI_SHELTER
     where CAPACITY < '1000';
-
-    
+/*´«¦W¦r*/

@@ -1,5 +1,5 @@
 create table MIAOLI_SHELTER(
-    NO NUMBER primary key,
+    NO NUMBER(5,0) primary key,
     ADDRESS NVARCHAR2(20),
     CAPACITY INTEGER,
     UNDERGROUND_FLOORS INTEGER,
