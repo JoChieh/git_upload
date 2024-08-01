@@ -2,7 +2,7 @@ create table MIAOLI_SHELTER(
     NO NUMBER primary key,
     ADDRESS NVARCHAR2(20),
     CAPACITY INTEGER,
-    UNDERGROUD_FLOORS INTEGER,
+    UNDERGROUND_FLOORS INTEGER,
     BUILDING_NO VARCHAR2(10 BYTE),
     VILLAGE_NO VARCHAR2(10 BYTE),
     POLICE_NO VARCHAR2(10 BYTE));
@@ -32,7 +32,7 @@ select * from MIAOLI_POLICE;
 
 /*¥[F.K.*/
 alter table MIAOLI_SHELTER
-    add foreign key(BUILDING_NO) references BUILDING(NO);
+    add foreign key(BUILDING_NO) references MIAOLI_BUILDING(NO);
     
 alter table MIAOLI_SHELTER
     add foreign key(VILLAGE_NO) references MIAOLI_VILLAGE(NO);
