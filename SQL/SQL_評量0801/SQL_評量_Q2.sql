@@ -19,7 +19,7 @@ create table MIAOLI_VILLAGE(
 
 create table MIAOLI_POLICE(
     NO VARCHAR2(10 BYTE) primary key,
-    POLICE NVARCHAR2(20),
+    NAME NVARCHAR2(20),
     ADDRESS NVARCHAR2(100),
     TEL NVARCHAR2(20));
     
