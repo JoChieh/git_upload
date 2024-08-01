@@ -8,24 +8,24 @@
 
 /*4-1. 列出 轄管 區域"內有單一 SHELTER大於 1000 CAPACITY  的 POLICE 及 POLICE.TEL*/
 
-select distinct /*SHELTER.CAPACITY, SHELTER.POLICE_NO, POLICE.NO, */POLICE.NAME, POLICE.TEL
+select distinct
+	POLICE.NAME as "轄區分局",
+	POLICE.TEL as "分局連絡電話"
     from(
         select CAPACITY, POLICE_NO
             from MIAOLI_SHELTER
             where CAPACITY > '1000'
     )SHELTER
-    left join(
-        select NO, NAME, TEL from MIAOLI_POLICE
-    )POLICE
+    left join MIAOLI_POLICE POLICE
     on SHELTER.POLICE_NO = POLICE.NO;
 /*4-2. 列出 轄管 區域內有單一 避難設施大於 1000 容人數量的 轄管分局 及 分局連絡電話 並 計算出 各 轄管分局數量 。 （關鍵字 partition */
 
 select distinct
-    NAME_TEL.NAME,
-    NAME_TEL.TEL,
-    count(NAME_TEL.NAME) over (partition by NAME_TEL.NAME) as COUNT
+    NAME as "轄管分局",
+    TEL as "分局連絡電話",
+    count(NAME) over (partition by NAME) as "轄管分局數量"
     from(
-        select /*SHELTER.CAPACITY, SHELTER.POLICE_NO, POLICE.NO, */
+        select
             POLICE.NAME, 
             POLICE.TEL
             from(
@@ -33,18 +33,16 @@ select distinct
                     from MIAOLI_SHELTER
                     where CAPACITY > '1000'
             )SHELTER
-            left join(
-                select NO, NAME, TEL from MIAOLI_POLICE
-            )POLICE
+            left join MIAOLI_POLICE POLICE
             on SHELTER.POLICE_NO = POLICE.NO
-    )NAME_TEL;
+    );
     
 /*4-3. 承上題， 再補上 SHELTER.ADRESS 、 BUILDING.TYPE*/
 select
-    NAME,
-    TEL,
-    ADDRESS,
-    TYPE
+    NAME as "轄管分局",
+    TEL as "分局連絡電話",
+    ADDRESS as "避難設施地址",
+    TYPE as "住宅類型"
     /*count(NAME_TEL.NAME) over (partition by NAME_TEL.NAME) as COUNT*/
     from(
         select /*SHELTER.CAPACITY, SHELTER.POLICE_NO, POLICE.NO, */
