@@ -27,7 +27,7 @@ create table MIAOLI_POLICE(
 /*CREATE з╣жи*/
 select * from MIAOLI_SHELTER;
 select * from MIAOLI_BUILDING;
-select * from MIAOLI_VILLAGE";
+select * from MIAOLI_VILLAGE;
 select * from MIAOLI_POLICE;
 
 /*е[F.K.*/
