@@ -1,7 +1,7 @@
 create table MIAOLI_SHELTER(
     NO NUMBER(5,0) primary key,
     ADDRESS NVARCHAR2(20),
-    CAPACITY INTEGER,
+    PEOPLE NUMBER(5,0),
     UNDERGROUND_FLOORS INTEGER,
     BUILDING_NO VARCHAR2(10 BYTE),
     VILLAGE_NO VARCHAR2(10 BYTE),
@@ -25,7 +25,7 @@ create table MIAOLI_POLICE(
     
     
 /*CREATE งนฆจ*/
-select * from MIAOLI_SHELTER;
+select * from STUDENT.MIAOLI_SHELTER;
 select * from MIAOLI_BUILDING;
 select * from MIAOLI_VILLAGE;
 select * from MIAOLI_POLICE;

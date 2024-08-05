@@ -5,10 +5,10 @@
 
 /*5-1*/
 update MIAOLI_SHELTER
-    set CAPACITY = '5000'
+    set PEOPLE = '5000'
     where ADDRESS = '苗栗縣竹南鎮和平街79號';
     
 /*5-2*/
 delete from MIAOLI_SHELTER
-    where CAPACITY < '1000';
+    where PEOPLE < '1000';
 /*換名字*/
