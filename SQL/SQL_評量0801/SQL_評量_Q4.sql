@@ -15,7 +15,7 @@ select distinct
     from MIAOLI_SHELTER SHELTER
     left join MIAOLI_POLICE POLICE
     on SHELTER.POLICE_NO = POLICE.NO
-    where PEOPLE > '1000';
+    where PEOPLE > 1000;
 /*4-2. 列出 轄管 區域內有單一 避難設施大於 1000 容人數量的 轄管分局 及 分局連絡電話 並 計算出 各 轄管分局數量 。 （關鍵字 partition */
 
 select distinct
@@ -25,7 +25,7 @@ select distinct
  from STUDENT.MIAOLI_SHELTER SHELTER
  left join STUDENT.MIAOLI_POLICE POLICE
  on SHELTER.POLICE_NO = POLICE.NO
- where SHELTER.PEOPLE > '1000';
+ where SHELTER.PEOPLE > 1000;
     
 /*4-3. 承上題， 再補上 SHELTER.ADRESS 、 BUILDING.TYPE*/
 /*減少子查詢 from SHELTER join POLICE*/
@@ -39,7 +39,7 @@ select
  on SHELTER.POLICE_NO = POLICE.NO
  left join STUDENT.MIAOLI_BUILDING BUILDING
  on SHELTER.BUILDING_NO = BUILDING.NO
- where SHELTER.PEOPLE > '1000';
+ where SHELTER.PEOPLE > 1000;
     
 /*4-4. 查詢SHELTER.ADDRESS包含「中」字的避難設施，列出資料必須含 村里別VILLAGE.NAME、 SHELTER.ADDRESS 、CAPACITY、POLICE.NAME及POLICE.TEL*/
 select 
