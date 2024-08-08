@@ -1,0 +1,71 @@
+package com.cathaybk.practice.nt50337.b;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.List;
+
+public class JavaQ4 {
+
+	public static void main(String[] args) {
+
+		List<Employee> employeeList = new ArrayList<>();
+
+		// Sales(String name, String dept, int salary, int volumn)
+		// Superviser(String name, String dept, int salary)
+		employeeList.add(new Sales("張志城", "信用卡部", 35000, 6000));
+		employeeList.add(new Sales("林大鈞", "保代部", 38000, 4000));
+		employeeList.add(new Superviser("李中白", "資訊部", 65000));
+		employeeList.add(new Superviser("林小中", "理財部", 80000));
+
+		String filePatch = "C:\\Users\\Admin\\Desktop\\output.csv";
+		File file = new File(filePatch);
+
+		//fileWriter：寫手，寫入檔案
+		//BufferedWriter：緩衝區，先寫在緩衝區再刷flush進fileWriter中
+		try (FileWriter fw = new FileWriter(file); BufferedWriter bufW = new BufferedWriter(fw);) {
+			
+			System.out.println("寫手宣告成功");
+			
+			int payment;// when to choose memory vs readable
+			for (Employee employee : employeeList) {
+				
+				//judge the instance of employees
+				if (employee instanceof Sales) {
+					payment = ((Sales) employee).getPayment();
+				} else {
+					payment = ((Superviser) employee).getPayment();
+				}
+				
+				
+				// write
+				try {
+					bufW.write(employee.getName() + ',' + payment);
+					bufW.newLine();
+					System.out.print(employee.getName() + ',');
+					System.out.println("寫入緩衝區成功");
+				} catch (Exception e) {
+					System.out.println("寫入緩衝區失敗");
+					e.printStackTrace();
+				}
+			}
+
+			// flush：將緩衝區數據刷新到目的文件中
+			try {
+				bufW.flush();
+				System.out.println("刷新成功");
+			} catch (Exception e) {
+				System.out.println("刷新失敗");
+				e.printStackTrace();
+			}
+
+
+			//don't need to close since bufw declared by try-with-resource
+		} catch (Exception e) {
+			System.out.println("寫手宣告失敗");
+			e.printStackTrace();
+		}
+
+	}
+}
