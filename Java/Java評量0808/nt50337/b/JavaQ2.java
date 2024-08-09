@@ -10,8 +10,9 @@ public class JavaQ2 {
 	public static void main(String[] args) {
 
 		List<Integer> lottoList = new LinkedList<Integer>();
-		for (int count = 0; count < 6; count++) {
-			Random rand = new Random();
+
+		Random rand = new Random();
+		while (lottoList.size() < 6) {
 
 			Integer num = rand.nextInt(49) + 1;
 

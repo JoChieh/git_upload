@@ -5,19 +5,15 @@ public class Superviser extends Employee {
 	private int payment;
 
 	public Superviser(String name, String dept, int salary) {
-		super.setName(name);
-		super.setDepartment(dept);
-		this.setSalary(salary);
-		this.setPayment(salary);
+		super(name, dept, salary);
+		this.payment = salary;
 	}
-	
 
 	@Override
 	public void printInfo() {
 		super.printInfo();
 		System.out.println("總計： " + payment);
 	}
-
 
 	// getter&setter
 	public int getPayment() {

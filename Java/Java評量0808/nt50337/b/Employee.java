@@ -6,6 +6,12 @@ public class Employee implements IWork {
 	private String department;
 	private int salary;
 
+	public Employee(String name, String dept, int salary) {
+		this.name = name;
+		this.department = dept;
+		this.salary = salary;
+	}
+
 	@Override
 	public void printInfo() {
 		System.out.println("薪資單");

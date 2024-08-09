@@ -6,25 +6,17 @@ public class Sales extends Employee {
 	private int payment;
 
 	public Sales(String name, String dept, int salary, int volumn) {
-		super.setName(name);
-		super.setDepartment(dept);
-		super.setSalary(salary);
-		
-		bonus = (int)(volumn * 0.05);
-		this.setPayment(salary + bonus);
+		super(name, dept, salary);
+		this.bonus = (int) (volumn * 0.05);
+		this.payment = salary + this.bonus;
 	}
-	
-	
 
 	@Override
 	public void printInfo() {
-		// TODO Auto-generated method stub
 		super.printInfo();
 		System.out.println("業績獎金： " + bonus);
 		System.out.println("總計： " + payment);
 	}
-
-
 
 	// getter&setter
 	public int getBonus() {
