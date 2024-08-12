@@ -6,12 +6,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.OutputStreamWriter;
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class JavaQ6 {
 
@@ -36,6 +38,7 @@ public class JavaQ6 {
 
 				tableList.add(lineMap);
 			}
+
 			System.out.println("讀取成功");
 
 			try {
@@ -48,10 +51,10 @@ public class JavaQ6 {
 					}
 
 				});
-				System.out.println("排序成功");
+				System.out.println("排序1成功");
 
 			} catch (Exception e) {
-				System.out.println("排序失敗");
+				System.out.println("排序1失敗");
 				e.printStackTrace();
 			}
 
@@ -108,6 +111,72 @@ public class JavaQ6 {
 			System.out.println("寫手宣告失敗");
 			e.printStackTrace();
 		}
+
+		// show on screen
+		// sort By Manufacturer
+		try {
+			// 實作Comparator介面
+			Collections.sort(tableList, new Comparator<Map<String, String>>() {
+
+				@Override
+				public int compare(Map<String, String> o1, Map<String, String> o2) {
+					return o1.get("Manufacturer").compareTo(o2.get("Manufacturer"));
+				}
+
+			});
+			System.out.println("排序2成功");
+
+		} catch (Exception e) {
+			System.out.println("排序2失敗");
+			e.printStackTrace();
+		}
+
+		// remove (Manufacturer, Type, Min.Price, Price)
+		for (String valueString : tableList.getLast().values()) {
+			System.out.printf("%-12s\t", valueString);
+		}
+		System.out.println();
+		tableList.removeLast();
+
+		BigDecimal bigSumMinPrice = new BigDecimal("0");
+		BigDecimal bigSumPrice = new BigDecimal("0");
+		BigDecimal sumMinPrice = new BigDecimal("0");
+		BigDecimal sumPrice = new BigDecimal("0");
+		BigDecimal nextMinPrice = new BigDecimal("0");
+		BigDecimal nextPrice = new BigDecimal("0");
+		String nextManufactuer = "Acura";
+
+		for (Map<String, String> lineMap : tableList) {
+
+			// add price
+			if (lineMap.get("Manufacturer").equals(nextManufactuer)) {
+				nextMinPrice = new BigDecimal(lineMap.get("Min.Price"));
+				nextPrice = new BigDecimal(lineMap.get("Price"));
+				sumMinPrice = sumMinPrice.add(nextMinPrice);
+				sumPrice = sumPrice.add(nextPrice);
+			} else {
+				System.out.printf("%-12s\t%-12s\t%-12s\t%-12s\t\n", "小計", "", sumMinPrice.toPlainString(),
+						sumPrice.toPlainString());
+				bigSumMinPrice = bigSumMinPrice.add(sumMinPrice);
+				sumMinPrice = new BigDecimal(lineMap.get("Min.Price"));
+				bigSumPrice = bigSumPrice.add(sumPrice);
+				sumPrice = new BigDecimal(lineMap.get("Price"));
+				nextManufactuer = lineMap.get("Manufacturer");
+			}
+
+			for (String valueString : lineMap.values()) {
+				System.out.printf("%-12s\t", valueString);
+			}
+			System.out.println();
+		}
+		// last else for last manufacturer
+		System.out.printf("%-12s\t%-12s\t%-12s\t%-12s\t\n", "小計", "", sumMinPrice.toPlainString(),
+				sumPrice.toPlainString());
+		bigSumMinPrice = bigSumMinPrice.add(sumMinPrice);
+		bigSumPrice = bigSumPrice.add(sumPrice);
+		System.out.printf("%-12s\t%-12s\t%-12s\t%-12s\t\n", "合計", "", bigSumMinPrice.toPlainString(),
+				bigSumPrice.toPlainString());
+
 	}
 
 }
