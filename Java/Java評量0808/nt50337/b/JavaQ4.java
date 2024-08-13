@@ -3,7 +3,6 @@ package com.cathaybk.practice.nt50337.b;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +21,7 @@ public class JavaQ4 {
 		String filePatch = "C:/Users/Admin/Desktop/output.csv";
 		File file = new File(filePatch);
 
-		// BufferedWriter：緩衝區，先寫在緩衝區再刷新(flush)FileOutputStream fos 進file中
+		// BufferedWriter：緩衝區，先寫在緩衝區再刷新(flush)FileOutputStream進file中
 		try (FileOutputStream fos = new FileOutputStream(file);
 				OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8");
 				BufferedWriter bufW = new BufferedWriter(osw);) {

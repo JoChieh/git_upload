@@ -6,12 +6,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.InputMismatchException;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Scanner;
 
 public class JavaQ7 {
 
 	public static final String CONN_URL = "jdbc:oracle:thin:@//localhost:1521/XE";
+	public static final String USERNAME = "student";
+	public static final String PASSWORD = "student123456";
 	public static final String SELECT_SQL = "select * from STUDENT.CARS where MANUFACTURER = ? and TYPE = ?";
 	public static final String INSERT_SQL = "insert into STUDENT.CARS (MANUFACTURER, TYPE, MIN_PRICE, PRICE) values(?, ?, ?, ?)";
 	public static final String UPDATE_SQL = "update STUDENT.CARS set MIN_PRICE = ?, PRICE = ? where MANUFACTURER = ? and TYPE = ?";
@@ -24,211 +28,229 @@ public class JavaQ7 {
 		// String input
 		String myOrder = sc.nextLine();
 
-		// declare as ""
-		String manufacturer = "";
-		String type = "";
+		String[] getManufacturerType;
 		String minPrice = "";
 		String price = "";
 
-		// get input manufacturer and type
-		System.out.print("請輸入製造商：");
-		manufacturer = sc.nextLine();
-		System.out.print("請輸入類型：");
-		type = sc.nextLine();
-
 		// get the rest of values and do myOrder
 		switch (myOrder) {
-		case "select":
-			query(manufacturer, type);
-			break;
-		case "delete":
-			delete(manufacturer, type);
-			break;
 		case "insert":
+			getManufacturerType = getManufacturerTypeInput(sc);
 			System.out.print("請輸入底價：");
 			minPrice = sc.nextLine();
 			System.out.print("請輸入售價：");
 			price = sc.nextLine();
 
 			Map<String, String> insertMap = new HashMap<>();
-			insertMap.put("MANUFACTURER", manufacturer);
-			insertMap.put("TYPE", type);
+			insertMap.put("MANUFACTURER", getManufacturerType[0]);
+			insertMap.put("TYPE", getManufacturerType[1]);
 			insertMap.put("MIN_PRICE", minPrice);
 			insertMap.put("PRICE", price);
 
 			insert(insertMap);
 			break;
 		case "update":
-			System.out.println("請輸入底價：");
+			getManufacturerType = getManufacturerTypeInput(sc);
+			System.out.print("請輸入底價：");
 			minPrice = sc.nextLine();
-			System.out.println("請輸入售價：");
+			System.out.print("請輸入售價：");
 			price = sc.nextLine();
 
-			Map<String, String> updateMap = new HashMap<String, String>();
-			updateMap.put("MANUFACTURER", manufacturer);
-			updateMap.put("TYPE", type);
+			Map<String, String> updateMap = new HashMap<>();
+			updateMap.put("MANUFACTURER", getManufacturerType[0]);
+			updateMap.put("TYPE", getManufacturerType[1]);
 			updateMap.put("MIN_PRICE", minPrice);
 			updateMap.put("PRICE", price);
 			update(updateMap);
 			break;
+		case "select":
+			getManufacturerType = getManufacturerTypeInput(sc);
+			query(getManufacturerType[0], getManufacturerType[1]);
+			break;
+		case "delete":
+			getManufacturerType = getManufacturerTypeInput(sc);
+			delete(getManufacturerType[0], getManufacturerType[1]);
+			break;
+		default:
+			System.out.println("輸入錯誤的指令，請重新執行程式");
+			break;
 		}
-		
+
 		sc.close();
-		
+
 	}
 
 	public static void query(String manufacturer, String type) {
-		try (Connection conn = DriverManager.getConnection(CONN_URL, "student", "student123456");
+		try (Connection conn = DriverManager.getConnection(CONN_URL, USERNAME, PASSWORD);
 				PreparedStatement pstmt = conn.prepareStatement(SELECT_SQL);) {
-			System.out.println("連線成功");
 
 			// query
-			if (!"".equals(manufacturer)) {
+			if ("".equals(manufacturer) || "".equals(type)) {
+				throw new InputMismatchException("未輸入待查詢的資訊，請重新執行一次");
+			} else {
 				pstmt.setString(1, manufacturer);
-			}
-			if (!"".equals(type)) {
 				pstmt.setString(2, type);
 			}
+
 			ResultSet rs = pstmt.executeQuery();
 
 			StringBuilder sb = new StringBuilder();
+			if (!rs.isBeforeFirst()) {
+				throw new InputMismatchException("輸入不存在於表格的資訊，請重新執行一次");
+			}
 
 			while (rs.next()) {
-				sb.append("{ MANUFACTURER： ").append(rs.getString(1)).append("   TYPE：").append(rs.getString(2))
-						.append("   MIN_PRICE：").append(rs.getString(3)).append("   PRICE：").append(rs.getString(4))
-						.append(" }");
+				sb.append("{ MANUFACTURER： ").append(rs.getString("MANUFACTURER")).append("   TYPE：")
+						.append(rs.getString("TYPE")).append("   MIN_PRICE：").append(rs.getString("MIN_PRICE"))
+						.append("   PRICE：").append(rs.getString("PRICE")).append(" }");
 				System.out.println(sb.toString());
 				sb.setLength(0);
 			}
-
-			System.out.println("Select成功");
+			rs.close();
 		} catch (Exception e) {
-			System.out.println("Select失敗");
-			e.printStackTrace();
+			System.err.println("select失敗：" + e.getMessage());
 		}
 
 	}
 
 	public static void insert(Map<String, String> insertMap) {
-		try (Connection conn = DriverManager.getConnection(CONN_URL, "student", "student123456");) {
+		try (Connection conn = DriverManager.getConnection(CONN_URL, USERNAME, PASSWORD);) {
 			try (PreparedStatement pstmt = conn.prepareStatement(INSERT_SQL);) {
-				System.out.println("連線成功");
 
-				// check if any value is empty
-				for (String value : insertMap.values()) {
-					if ("".equals(value)) {
-						throw new Exception("insert值須填滿");
-					}
+				String manufacturer = insertMap.get("MANUFACTURER");
+				String type = insertMap.get("TYPE");
+				String minPrice = insertMap.get("MIN_PRICE");
+				String price = insertMap.get("PRICE");
+
+				if ("".equals(manufacturer) || "".equals(type) || "".equals(type) || "".equals(type)) {
+					throw new InputMismatchException("insert值須填滿，請重新執行一次");
 				}
 
 				// insert
 				conn.setAutoCommit(false);
-				pstmt.setString(1, insertMap.get("MANUFACTURER"));
-				pstmt.setString(2, insertMap.get("TYPE"));
-				pstmt.setDouble(3, Double.valueOf(insertMap.get("MIN_PRICE")));
-				pstmt.setInt(4, Integer.valueOf(insertMap.get("PRICE")));
-				pstmt.executeUpdate();
-				conn.commit();
 
-				System.out.println("Insert成功");
-
-			} catch (Exception e) {
-				System.out.println("Insert失敗");
-
-				// rollback
 				try {
-					conn.rollback();
-					System.out.println("Rollback成功");
-				} catch (SQLException sqle) {
-					System.out.println("Rollback失敗");
-					sqle.printStackTrace();
+					pstmt.setDouble(3, Double.parseDouble(minPrice));
+					pstmt.setDouble(4, Double.parseDouble(price));
+				} catch (NumberFormatException nfe) {
+					throw new NumberFormatException("輸入的售價或底價並非數字，請重新執行一次");
 				}
 
-				e.printStackTrace();
+				pstmt.setString(1, insertMap.get("MANUFACTURER"));
+				pstmt.setString(2, insertMap.get("TYPE"));
+				pstmt.executeUpdate();
+				conn.commit();
+				System.out.println("Insert成功");
+			} catch (Exception e) {
+				System.err.println("Insert失敗：" + e.getMessage());
+
+				try {
+					conn.setAutoCommit(false);
+					conn.rollback();
+				} catch (SQLException sqle) {
+					System.err.println("Rollback失敗" + sqle.getMessage());
+				}
 			}
 		} catch (Exception e) {
-			System.out.println("連線失敗");
-			e.printStackTrace();
+			System.err.println("連線失敗");
 		}
 
 	}
 
 	public static void update(Map<String, String> updateMap) {
-		try (Connection conn = DriverManager.getConnection(CONN_URL, "student", "student123456");) {
+		try (Connection conn = DriverManager.getConnection(CONN_URL, USERNAME, PASSWORD);) {
 			try (PreparedStatement pstmt = conn.prepareStatement(UPDATE_SQL);) {
-				System.out.println("連線成功");
 
 				// update
-				conn.setAutoCommit(false);
-				// set
-				if(!"".equals(updateMap.get("MIN_PRICE"))) {
-					pstmt.setDouble(1, Double.valueOf(updateMap.get("MIN_PRICE")));
-				}
-				if(!"".equals(updateMap.get("PRICE"))) {
-					pstmt.setInt(2, Integer.valueOf(updateMap.get("PRICE")));
-				}
 				// where
-				pstmt.setString(3, updateMap.get("MANUFACTURER"));
-				pstmt.setString(4, updateMap.get("TYPE"));
+				String manufacturer = updateMap.get("MANUFACTURER");
+				String type = updateMap.get("TYPE");
 
-				pstmt.executeUpdate();
+				conn.setAutoCommit(false);
+				if ("".equals(manufacturer) || "".equals(type)) {
+					throw new InputMismatchException("未輸入待更新的資訊，請重新執行一次");
+				} else {
+					pstmt.setString(3, manufacturer);
+					pstmt.setString(4, type);
+				}
+
+				// set
+				double minPrice;
+				double price;
+
+				try {
+					minPrice = Double.parseDouble(updateMap.get("MIN_PRICE"));
+					price = Double.parseDouble(updateMap.get("PRICE"));
+				} catch (NumberFormatException nfe) {
+					throw new NumberFormatException("輸入的售價或底價並非數字，請重新執行一次");
+				}
+				pstmt.setDouble(1, minPrice);
+				pstmt.setDouble(2, price);
+
+				if (pstmt.executeUpdate() != 0) {
+					pstmt.executeUpdate();
+				} else {
+					throw new InputMismatchException("輸入不存在於表格的資訊，請重新執行一次");
+				}
 				conn.commit();
-
 				System.out.println("Update成功");
 			} catch (Exception e) {
-				System.out.println("Update失敗");
+				System.err.println("Update失敗：" + e.getMessage());
 
-				// rollback
 				try {
 					conn.rollback();
-					System.out.println("Rollback成功");
 				} catch (SQLException sqle) {
-					System.out.println("Rollback失敗");
-					sqle.printStackTrace();
+					System.err.println("Rollback失敗：" + sqle.getMessage());
 				}
-
-				e.printStackTrace();
 			}
 
 		} catch (Exception e) {
-			System.out.println("連線失敗");
-			e.printStackTrace();
+			System.err.println("連線失敗：" + e.getMessage());
 		}
 	}
 
 	public static void delete(String manufacturer, String type) {
-		try (Connection conn = DriverManager.getConnection(CONN_URL, "student", "student123456");) {
+		try (Connection conn = DriverManager.getConnection(CONN_URL, USERNAME, PASSWORD);) {
 			try (PreparedStatement pstmt = conn.prepareStatement(DELETE_SQL);) {
-				System.out.println("連線成功");
 				// delete
 				conn.setAutoCommit(false);
-				if (!"".equals(manufacturer)) {
+				if ("".equals(manufacturer) || "".equals(type)) {
+
+					throw new InputMismatchException("未輸入待刪除的資訊，請重新執行一次");
+				} else {
 					pstmt.setString(1, manufacturer);
-				}
-				if (!"".equals(type)) {
 					pstmt.setString(2, type);
 				}
-				pstmt.executeUpdate();
+
+				if (pstmt.executeUpdate() != 0) {
+					pstmt.executeUpdate();
+				} else {
+					throw new InputMismatchException("表格中找不到您輸入的資料，請重新執行一次");
+				}
+				System.out.println("Update成功");
 				conn.commit();
 
-				System.out.println("Delete成功");
-
 			} catch (Exception e) {
-				System.out.println("Delete失敗");
+				System.err.println("Delete失敗："+ e.getMessage());
 
-				// rollback
 				try {
 					conn.rollback();
-					System.out.println("Rollback成功");
 				} catch (SQLException sqle) {
-					System.out.println("Rollback失敗");
+					System.err.println("Rollback失敗："+ sqle.getMessage());
 					sqle.printStackTrace();
 				}
-				e.printStackTrace();
 			}
 		} catch (Exception e) {
-			System.out.println("連線失敗");
-			e.printStackTrace();
+			System.err.println("連線失敗：" + e.getMessage());
 		}
+	}
+
+	public static String[] getManufacturerTypeInput(Scanner sc) {
+		String[] getManufacturerType = new String[2];
+		System.out.print("請輸入製造商：");
+		getManufacturerType[0] = sc.nextLine();
+		System.out.print("請輸入類型：");
+		getManufacturerType[1] = sc.nextLine();
+		return getManufacturerType;
 	}
 }

@@ -1,6 +1,7 @@
 package com.cathaybk.practice.nt50337.b;
 
 import java.util.Calendar;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class JavaQ5 {
@@ -8,15 +9,25 @@ public class JavaQ5 {
 	public static void main(String[] args) {
 		System.out.print("輸入介於1-12間的整數m:");
 		Scanner sc = new Scanner(System.in);
-		int myMonth = sc.nextInt();
-		sc.close();
+		int myMonth = 0;
+		try {
+			myMonth = sc.nextInt();
+			if (!(myMonth > 0 && myMonth < 13)) {
+				throw new InputMismatchException();
+			}
+		} catch (InputMismatchException ime) {
+			System.err.println("並非介於1-12間的整數，請重新再執行一次");
+			System.exit(0);
+		} finally {
+			sc.close();
+		}
 
 		Calendar cal = Calendar.getInstance();
 		int year = cal.get(Calendar.YEAR);
 		cal.set(Calendar.MONTH, myMonth - 1);// month-1
 		int month = cal.get(Calendar.MONTH) + 1;
 
-		System.out.printf("                     %d年%d月\n", year, month);
+		System.out.printf("%25d年%d月\n", year, month);
 		System.out.println("---------------------------------------------------");
 		System.out.printf("%s\t%s\t%s\t%s\t%s\t%s\t%s\n", "日", "一", "二", "三", "四", "五", "六");
 		System.out.println("===================================================");

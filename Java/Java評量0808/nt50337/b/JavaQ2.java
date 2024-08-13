@@ -9,7 +9,7 @@ public class JavaQ2 {
 
 	public static void main(String[] args) {
 
-		List<Integer> lottoList = new LinkedList<Integer>();
+		List<Integer> lottoList = new LinkedList<>();
 
 		Random rand = new Random();
 		while (lottoList.size() < 6) {

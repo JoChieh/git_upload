@@ -13,23 +13,33 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 public class JavaQ6 {
 
+	public static final String INFILE_PATH = "C:/Users/Admin/Desktop/cars.csv";
+	public static final String OUTFILE_PATH_STRING = "C:/Users/Admin/Desktop/cars2.csv";
+
 	public static void main(String[] args) {
 
-		String filePatch = "C:/Users/Admin/Desktop/cars.csv";
-		File file = new File(filePatch);
+		File inFile = new File(INFILE_PATH);
 
+		Map<String, String> headMap = new LinkedHashMap<>();
 		List<Map<String, String>> tableList = new LinkedList<>();
 		// read
-		try (FileReader fr = new FileReader(file); BufferedReader br = new BufferedReader(fr);) {
+		try (FileReader fr = new FileReader(inFile); BufferedReader br = new BufferedReader(fr);) {
+
+			String commaLine = br.readLine();
+			String[] lineArr = commaLine.split(",");
+
+			headMap.put("Manufacturer", lineArr[0]);
+			headMap.put("Type", lineArr[1]);
+			headMap.put("Min.Price", lineArr[2]);
+			headMap.put("Price", lineArr[3]);
 
 			while (br.ready()) {
 				Map<String, String> lineMap = new LinkedHashMap<>();
-				String commaLine = br.readLine();
-				String[] lineArr = commaLine.split(",");
+				commaLine = br.readLine();
+				lineArr = commaLine.split(",");
 
 				lineMap.put("Manufacturer", lineArr[0]);
 				lineMap.put("Type", lineArr[1]);
@@ -37,11 +47,7 @@ public class JavaQ6 {
 				lineMap.put("Price", lineArr[3]);
 
 				tableList.add(lineMap);
-			}
 
-			System.out.println("讀取成功");
-
-			try {
 				// 實作Comparator介面
 				Collections.sort(tableList, new Comparator<Map<String, String>>() {
 
@@ -51,40 +57,33 @@ public class JavaQ6 {
 					}
 
 				});
-				System.out.println("排序1成功");
-
-			} catch (Exception e) {
-				System.out.println("排序1失敗");
-				e.printStackTrace();
 			}
 
 		} catch (Exception e) {
 			System.out.println("讀取失敗");
-
 		}
 
 		// write
-		String file2Patch = "C:/Users/Admin/Desktop/cars2.csv";
-		File file2 = new File(file2Patch);
-		try (FileOutputStream fos = new FileOutputStream(file2);
+		File outFile = new File(OUTFILE_PATH_STRING);
+		try (FileOutputStream fos = new FileOutputStream(outFile);
 				OutputStreamWriter osw = new OutputStreamWriter(fos);
 				BufferedWriter bfw = new BufferedWriter(osw);) {
 
-			System.out.println("寫手宣告成功");
-
-			// add BOM(byte-order mark)
+			// write
 			try {
+				// add BOM(byte-order mark)
 				fos.write(0xef);
 				fos.write(0xbb);
 				fos.write(0xbf);
-				System.out.println("BOM新增成功");
-			} catch (Exception e) {
-				System.out.println("BOM新增失敗");
-				e.printStackTrace();
-			}
 
-			// write
-			try {
+				// write table head
+				bfw.write(headMap.get("Manufacturer") + ',');
+				bfw.write(headMap.get("Type") + ',');
+				bfw.write(headMap.get("Min.Price") + ',');
+				bfw.write(headMap.get("Price"));
+				bfw.newLine();
+
+				// write table data
 				for (Map<String, String> lineMap : tableList) {
 					bfw.write(lineMap.get("Manufacturer") + ',');
 					bfw.write(lineMap.get("Type") + ',');
@@ -92,7 +91,6 @@ public class JavaQ6 {
 					bfw.write(lineMap.get("Price"));
 					bfw.newLine();
 				}
-				System.out.println("寫入緩衝區成功");
 			} catch (Exception e) {
 				System.out.println("寫入緩衝區失敗");
 				e.printStackTrace();
@@ -101,7 +99,6 @@ public class JavaQ6 {
 			// flush：將緩衝區數據刷新到目的文件中
 			try {
 				bfw.flush();
-				System.out.println("刷新成功");
 			} catch (Exception e) {
 				System.out.println("刷新失敗");
 				e.printStackTrace();
@@ -114,60 +111,58 @@ public class JavaQ6 {
 
 		// show on screen
 		// sort By Manufacturer
-		try {
-			// 實作Comparator介面
-			Collections.sort(tableList, new Comparator<Map<String, String>>() {
 
-				@Override
-				public int compare(Map<String, String> o1, Map<String, String> o2) {
-					return o1.get("Manufacturer").compareTo(o2.get("Manufacturer"));
-				}
+		// 實作Comparator介面
+		Collections.sort(tableList, new Comparator<Map<String, String>>() {
 
-			});
-			System.out.println("排序2成功");
+			@Override
+			public int compare(Map<String, String> o1, Map<String, String> o2) {
+				return o1.get("Manufacturer").compareTo(o2.get("Manufacturer"));
+			}
 
-		} catch (Exception e) {
-			System.out.println("排序2失敗");
-			e.printStackTrace();
-		}
+		});
 
-		// remove (Manufacturer, Type, Min.Price, Price)
-		for (String valueString : tableList.getLast().values()) {
+		// print screen
+
+		// print table head
+		for (String valueString : headMap.values()) {
 			System.out.printf("%-12s\t", valueString);
 		}
 		System.out.println();
-		tableList.removeLast();
 
-		BigDecimal bigSumMinPrice = new BigDecimal("0");
-		BigDecimal bigSumPrice = new BigDecimal("0");
-		BigDecimal sumMinPrice = new BigDecimal("0");
-		BigDecimal sumPrice = new BigDecimal("0");
-		BigDecimal nextMinPrice = new BigDecimal("0");
-		BigDecimal nextPrice = new BigDecimal("0");
-		String nextManufactuer = "Acura";
+		// default sums;
+		BigDecimal bigSumMinPrice = BigDecimal.ZERO;
+		BigDecimal bigSumPrice = BigDecimal.ZERO;
+		BigDecimal sumMinPrice = BigDecimal.ZERO;
+		BigDecimal sumPrice = BigDecimal.ZERO;
+		// default data values;
+		String thisManufacturer;
+		String thisType;
+		BigDecimal thisMinPrice = BigDecimal.ZERO;
+		BigDecimal thisPrice = BigDecimal.ZERO;
+		String nextManufactuer = tableList.get(1).get("Manufacturer");
 
+		// print table data
 		for (Map<String, String> lineMap : tableList) {
-
+			// get values
+			thisManufacturer = lineMap.get("Manufacturer");
+			thisType = lineMap.get("Type");
+			thisMinPrice = new BigDecimal(lineMap.get("Min.Price"));
+			thisPrice = new BigDecimal(lineMap.get("Price"));
 			// add price
-			if (lineMap.get("Manufacturer").equals(nextManufactuer)) {
-				nextMinPrice = new BigDecimal(lineMap.get("Min.Price"));
-				nextPrice = new BigDecimal(lineMap.get("Price"));
-				sumMinPrice = sumMinPrice.add(nextMinPrice);
-				sumPrice = sumPrice.add(nextPrice);
+			if (nextManufactuer.equals(thisManufacturer)) {
+				sumMinPrice = sumMinPrice.add(thisMinPrice);
+				sumPrice = sumPrice.add(thisPrice);
 			} else {
-				System.out.printf("%-12s\t%-12s\t%-12s\t%-12s\t\n", "小計", "", sumMinPrice.toPlainString(),
-						sumPrice.toPlainString());
+				System.out.printf("%-12s\t%-12s\t%-12s\t%-12s\t\n", "小計", "", sumMinPrice.toPlainString(), sumPrice.toPlainString());
 				bigSumMinPrice = bigSumMinPrice.add(sumMinPrice);
-				sumMinPrice = new BigDecimal(lineMap.get("Min.Price"));
+				sumMinPrice = thisMinPrice;
 				bigSumPrice = bigSumPrice.add(sumPrice);
-				sumPrice = new BigDecimal(lineMap.get("Price"));
-				nextManufactuer = lineMap.get("Manufacturer");
+				sumPrice = thisPrice;
+				nextManufactuer = thisManufacturer;
 			}
-
-			for (String valueString : lineMap.values()) {
-				System.out.printf("%-12s\t", valueString);
-			}
-			System.out.println();
+			//print values
+			System.out.printf("%-12s\t%-12s\t%-12s\t%-12s\t\n", thisManufacturer, thisType, thisMinPrice, thisPrice);
 		}
 		// last else for last manufacturer
 		System.out.printf("%-12s\t%-12s\t%-12s\t%-12s\t\n", "小計", "", sumMinPrice.toPlainString(),
