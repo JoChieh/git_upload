@@ -1,5 +1,6 @@
 package com.cathaybk.practice.nt50337.b;
 
+import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -9,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-public class JavaQ7 {
+public class JavaQ7New {
 
 	public static final String CONN_URL = "jdbc:oracle:thin:@//localhost:1521/XE";
 	public static final String USERNAME = "student";
@@ -157,43 +158,68 @@ public class JavaQ7 {
 
 	public static void update(Map<String, String> updateMap) {
 		try (Connection conn = DriverManager.getConnection(CONN_URL, USERNAME, PASSWORD);) {
-			try (PreparedStatement pstmt = conn.prepareStatement(UPDATE_SQL);) {
+			try (Statement stmt = conn.createStatement();) {
 
-				// update
-				// where
 				String manufacturer = updateMap.get("MANUFACTURER");
 				String type = updateMap.get("TYPE");
+				String minPriceString = updateMap.get("MIN_PRICE");
+				String priceString = updateMap.get("PRICE");
 
-				conn.setAutoCommit(false);
+				// where empty
 				if ("".equals(manufacturer) || "".equals(type)) {
-					throw new Exception("未輸入待更新的資訊，請重新執行一次");
-				} else {
-					pstmt.setString(3, manufacturer);
-					pstmt.setString(4, type);
+					throw new Exception("未輸入待更新資料的廠商或型號，請重新執行一次");
 				}
+				// set empty
+				if ("".equals(minPriceString) && "".equals(priceString)) {
+					throw new Exception("未輸入待更新資料的底價及售價，請重新執行一次");
+				}
+
+				StringBuilder sb = new StringBuilder();
+				sb.append("update STUDENT.CARS set");
 
 				// set
 				double minPrice;
 				double price;
-
-				try {
-					minPrice = Double.parseDouble(updateMap.get("MIN_PRICE"));
-					price = Double.parseDouble(updateMap.get("PRICE"));
-				} catch (NumberFormatException nfe) {
-					throw new NumberFormatException("輸入的售價或底價並非數字，請重新執行一次");
+				if (!("".equals(minPriceString) || "".equals(priceString))) {// both not empty
+					try {
+						minPrice = Double.parseDouble(minPriceString);
+						price = Double.parseDouble(priceString);
+					} catch (NumberFormatException nfe) {
+						throw new NumberFormatException("輸入的售價或底價並非數字，請重新執行一次");
+					}
+					sb.append("MIN_PRICE ='").append(minPriceString).append("' , PRICE = '").append(priceString);
+				} else if ("".equals(minPriceString) && !"".equals(priceString)) {// price not empty
+					try {
+						price = Double.parseDouble(priceString);
+					} catch (NumberFormatException nfe) {
+						throw new NumberFormatException("輸入的售價並非數字，請重新執行一次");
+					}
+					sb.append(" PRICE = '").append(priceString);
+				} else {// minPrice not empty
+					try {
+						minPrice = Double.parseDouble(minPriceString);
+					} catch (NumberFormatException nfe) {
+						throw new NumberFormatException("輸入的底價並非數字，請重新執行一次");
+					}
+					sb.append(" MIN_PRICE = '").append(minPriceString);
 				}
-				pstmt.setDouble(1, minPrice);
-				pstmt.setDouble(2, price);
 
-				if (pstmt.executeUpdate() == 0) {
+				sb.append("' where MANUFACTURER = '").append(manufacturer).append("' and  TYPE = '").append(type)
+						.append("'");
+				String sqlStr = sb.toString();
+
+				if (stmt.executeUpdate(sqlStr) != 0) {
+					stmt.executeUpdate(sqlStr);
+				} else {
 					throw new Exception("輸入不存在於表格的資訊，請重新執行一次");
 				}
-				conn.commit();
+
 				System.out.println("Update成功");
 			} catch (Exception e) {
 				System.err.println("Update失敗：" + e.getMessage());
 
 				try {
+					conn.setAutoCommit(false);
 					conn.rollback();
 				} catch (SQLException sqle) {
 					System.err.println("Rollback失敗：" + sqle.getMessage());
@@ -227,12 +253,12 @@ public class JavaQ7 {
 				conn.commit();
 
 			} catch (Exception e) {
-				System.err.println("Delete失敗："+ e.getMessage());
+				System.err.println("Delete失敗：" + e.getMessage());
 
 				try {
 					conn.rollback();
 				} catch (SQLException sqle) {
-					System.err.println("Rollback失敗："+ sqle.getMessage());
+					System.err.println("Rollback失敗：" + sqle.getMessage());
 					sqle.printStackTrace();
 				}
 			}
