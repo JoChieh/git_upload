@@ -1,13 +1,11 @@
 package com.cathaybk.practice.nt50337.b;
 
-import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.InputMismatchException;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -86,7 +84,7 @@ public class JavaQ7New {
 
 			// query
 			if ("".equals(manufacturer) || "".equals(type)) {
-				throw new InputMismatchException("未輸入待查詢的資訊，請重新執行一次");
+				throw new Exception("未輸入待查詢的資訊，請重新執行一次");
 			} else {
 				pstmt.setString(1, manufacturer);
 				pstmt.setString(2, type);
@@ -96,7 +94,7 @@ public class JavaQ7New {
 
 			StringBuilder sb = new StringBuilder();
 			if (!rs.isBeforeFirst()) {
-				throw new InputMismatchException("輸入不存在於表格的資訊，請重新執行一次");
+				throw new Exception("輸入不存在於表格的資訊，請重新執行一次");
 			}
 
 			while (rs.next()) {
@@ -123,7 +121,7 @@ public class JavaQ7New {
 				String price = insertMap.get("PRICE");
 
 				if ("".equals(manufacturer) || "".equals(type) || "".equals(type) || "".equals(type)) {
-					throw new InputMismatchException("insert值須填滿，請重新執行一次");
+					throw new Exception("insert值須填滿，請重新執行一次");
 				}
 
 				// insert
@@ -158,78 +156,87 @@ public class JavaQ7New {
 	}
 
 	public static void update(Map<String, String> updateMap) {
-		try (Connection conn = DriverManager.getConnection(CONN_URL, USERNAME, PASSWORD);) {
-			try (Statement stmt = conn.createStatement();) {
+		
+			String manufacturer = updateMap.get("MANUFACTURER");
+			String type = updateMap.get("TYPE");
+			double minPrice = 0;
+			double price = 0;
+			boolean minPriceEmpty = false;
+			boolean priceEmpty = false;
 
-				String manufacturer = updateMap.get("MANUFACTURER");
-				String type = updateMap.get("TYPE");
-				String minPriceString = updateMap.get("MIN_PRICE");
-				String priceString = updateMap.get("PRICE");
-
+			// Step 1: check input, wrong then end the method
+			try {
 				// where empty
 				if ("".equals(manufacturer) || "".equals(type)) {
-					throw new InputMismatchException("未輸入待更新資料的廠商或型號，請重新執行一次");
+					throw new Exception("未輸入待更新資料的廠商或型號，請重新執行一次");
 				}
+				String minPriceString = updateMap.get("MIN_PRICE");
+				String priceString = updateMap.get("PRICE");
+				minPriceEmpty = "".equals(minPriceString);
+				priceEmpty = "".equals(priceString);
 				// set empty
-				if ("".equals(minPriceString) && "".equals(priceString)) {
-					throw new InputMismatchException("未輸入待更新資料的底價及售價，請重新執行一次");
+				if (minPriceEmpty && priceEmpty) {
+					throw new Exception("未輸入待更新資料的底價及售價，請重新執行一次");
 				}
-
-				StringBuilder sb = new StringBuilder();
-				sb.append("update STUDENT.CARS set");
-
 				// set
-				double minPrice;
-				double price;
-				if (!("".equals(minPriceString) || "".equals(priceString))) {// both not empty
-					try {
-						minPrice = Double.parseDouble(minPriceString);
-						price = Double.parseDouble(priceString);
-					} catch (NumberFormatException nfe) {
-						throw new NumberFormatException("輸入的售價或底價並非數字，請重新執行一次");
-					}
-					sb.append("MIN_PRICE ='").append(minPriceString).append("' , PRICE = '").append(priceString);
-				} else if ("".equals(minPriceString) && !"".equals(priceString)) {// price not empty
-					try {
-						price = Double.parseDouble(priceString);
-					} catch (NumberFormatException nfe) {
-						throw new NumberFormatException("輸入的售價並非數字，請重新執行一次");
-					}
-					sb.append(" PRICE = '").append(priceString);
-				} else {// minPrice not empty
-					try {
-						minPrice = Double.parseDouble(minPriceString);
-					} catch (NumberFormatException nfe) {
-						throw new NumberFormatException("輸入的底價並非數字，請重新執行一次");
-					}
-					sb.append(" MIN_PRICE = '").append(minPriceString);
+				if (!minPriceEmpty) {
+					minPrice = Double.parseDouble(minPriceString);
 				}
-
-				sb.append("' where MANUFACTURER = '").append(manufacturer).append("' and  TYPE = '").append(type)
-						.append("'");
-				String sqlStr = sb.toString();
-
-				if (stmt.executeUpdate(sqlStr) != 0) {
-					stmt.executeUpdate(sqlStr);
-				} else {
-					throw new InputMismatchException("輸入不存在於表格的資訊，請重新執行一次");
+				if (!priceEmpty) {
+					price = Double.parseDouble(priceString);
 				}
-
-				System.out.println("Update成功");
+			} catch (NumberFormatException nfe) {
+				throw new NumberFormatException("輸入的售價或底價並非數字，請重新執行一次");
 			} catch (Exception e) {
-				System.err.println("Update失敗：" + e.getMessage());
-
-				try {
-					conn.setAutoCommit(false);
-					conn.rollback();
-				} catch (SQLException sqle) {
-					System.err.println("Rollback失敗：" + sqle.getMessage());
-				}
+				System.err.println("連線失敗：" + e.getMessage());
 			}
 
-		} catch (Exception e) {
-			System.err.println("連線失敗：" + e.getMessage());
-		}
+			// Step 2: Combine UPDATE_SQL
+			StringBuilder sb = new StringBuilder();
+			sb.append("update STUDENT.CARS set");
+			if (!minPriceEmpty && !priceEmpty) {
+				sb.append("MIN_PRICE = ?, PRICE = ? ");
+			} else if (minPriceEmpty) {
+				sb.append("PRICE = ? ");
+			} else if (priceEmpty) {
+				sb.append("MIN_PRICE = ? ");
+			}
+			String sqlString = sb.append(" where MANUFACTURER = ? and TYPE = ?").toString();
+
+			// Step 3: Connect DB
+			try (Connection conn = DriverManager.getConnection(CONN_URL, USERNAME, PASSWORD)) {
+				conn.setAutoCommit(false);
+				try (PreparedStatement pstmt = conn.prepareStatement(sqlString)) {
+					if (!minPriceEmpty && !priceEmpty) {
+						pstmt.setDouble(1, minPrice);
+						pstmt.setDouble(2, price);
+					}
+					if (minPriceEmpty) {
+						pstmt.setDouble(1, price);
+					}
+					if (priceEmpty) {
+						pstmt.setDouble(2, minPrice);
+					}
+					pstmt.setString(3, manufacturer);
+					pstmt.setString(4, type);
+
+					int row = pstmt.executeUpdate();
+					System.err.println("update row: " + row);
+					conn.commit();
+					if (row == 0) {
+						System.err.println("Nothing update");
+						return;
+					}
+					System.out.println("Update成功");
+				} catch (SQLException sqle) {
+					System.err.println("Update失敗：" + sqle.getMessage());
+					conn.rollback();
+				}
+			} catch (Exception e) {
+				System.err.println("連線失敗：" + e.getMessage());
+			}
+		
+
 	}
 
 	public static void delete(String manufacturer, String type) {
@@ -239,7 +246,7 @@ public class JavaQ7New {
 				conn.setAutoCommit(false);
 				if ("".equals(manufacturer) || "".equals(type)) {
 
-					throw new InputMismatchException("未輸入待刪除的資訊，請重新執行一次");
+					throw new Exception("未輸入待刪除的資訊，請重新執行一次");
 				} else {
 					pstmt.setString(1, manufacturer);
 					pstmt.setString(2, type);
@@ -248,7 +255,7 @@ public class JavaQ7New {
 				if (pstmt.executeUpdate() != 0) {
 					pstmt.executeUpdate();
 				} else {
-					throw new InputMismatchException("表格中找不到您輸入的資料，請重新執行一次");
+					throw new Exception("表格中找不到您輸入的資料，請重新執行一次");
 				}
 				System.out.println("Update成功");
 				conn.commit();

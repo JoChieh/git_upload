@@ -185,11 +185,14 @@ public class JavaQ7 {
 				pstmt.setDouble(1, minPrice);
 				pstmt.setDouble(2, price);
 
-				if (pstmt.executeUpdate() == 0) {
+				int row = pstmt.executeUpdate();
+				if (row != 0) {
+					System.out.println("Update成功");
+				}else {
 					throw new Exception("輸入不存在於表格的資訊，請重新執行一次");
 				}
 				conn.commit();
-				System.out.println("Update成功");
+				
 			} catch (Exception e) {
 				System.err.println("Update失敗：" + e.getMessage());
 
