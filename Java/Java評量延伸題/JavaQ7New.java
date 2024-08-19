@@ -210,15 +210,20 @@ public class JavaQ7New {
 					if (!minPriceEmpty && !priceEmpty) {
 						pstmt.setDouble(1, minPrice);
 						pstmt.setDouble(2, price);
+						pstmt.setString(3, manufacturer);
+						pstmt.setString(4, type);
 					}
 					if (minPriceEmpty) {
 						pstmt.setDouble(1, price);
+						pstmt.setString(2, manufacturer);
+						pstmt.setString(3, type);
 					}
 					if (priceEmpty) {
-						pstmt.setDouble(2, minPrice);
+						pstmt.setDouble(1, minPrice);
+						pstmt.setString(2, manufacturer);
+						pstmt.setString(3, type);
 					}
-					pstmt.setString(3, manufacturer);
-					pstmt.setString(4, type);
+					
 
 					int row = pstmt.executeUpdate();
 					System.err.println("update row: " + row);
