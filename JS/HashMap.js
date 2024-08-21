@@ -3,7 +3,7 @@ window.onload = function () {
         let map = {};
         return {
             put: function (key, value) {
-                map[key] = value; //map.key === map['key']
+                map[key] = value;
             },
             keys: function () {
                 const keySet = [];
@@ -13,17 +13,6 @@ window.onload = function () {
                 return keySet;
             },
             contains: function (key) {
-                /*let isHas;
-                for (let k in map) {
-                    if (k === key) {
-                        isHas = true;
-                        break;
-                    }else{
-                        isHas = false
-                    }
-                }
-                return isHas;*/
-
                 for (let k in map) {
                     if (k === key) {
                         return true;
@@ -40,10 +29,10 @@ window.onload = function () {
         };
     };
     const tagArticle = document.querySelector('article');
-    const datas = new HashMap();
+    const dataMap = new HashMap();
 
     document.getElementById("putBtn").addEventListener('click', function () {
-               
+
         const newKey = document.getElementById("key").value;
         const newValue = document.getElementById("value").value;
         //not Empty
@@ -51,29 +40,29 @@ window.onload = function () {
             return;
         }
         //not repeated
-        if (datas.contains(newKey)) {
+        if (dataMap.contains(newKey)) {
             return;
         }
-        datas.put(newKey, newValue);
-        
-        tagArticle.innerHTML='';
+        dataMap.put(newKey, newValue);
+
+        tagArticle.innerHTML = '';
         const tagP = document.createElement('p');
         const tagBr = document.createElement('br');
         tagP.innerHTML = '【RESULT】';
         tagArticle.appendChild(tagP);
-        const keys = datas.keys();
+        const keys = dataMap.keys();
         let tagP1 = '';
         for (let k of keys) {
             tagP1 = document.createElement('p');
-            tagP1.innerHTML = '&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp' + k + '&nbsp:&nbsp' + datas.get(k);
+            tagP1.innerHTML = '&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp' + k + '&nbsp:&nbsp' + dataMap.get(k);
             tagArticle.appendChild(tagP1);
         }
 
     });
 
     document.getElementById("clearBtn").addEventListener('click', function () {
-        datas.clear();
-        tagArticle.innerHTML='';
+        dataMap.clear();
+        tagArticle.innerHTML = '';
         document.getElementById("key").value = '';
         document.getElementById("value").value = '';
 
