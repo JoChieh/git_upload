@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>操作DOM物件-table</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        tr {
+            height: 50px
+        }
+
+        td {
+            width: 50px;
+        }
+
+        #input {
+            height: 150px
+        }
+
+        #output {
+            width: 400px;
+        }
+    </style>
+    <script>
+        window.onload = function () {
+            const inputTable = document.getElementById("input");
+            const outputTable = document.getElementById("output");
+            let manufacturer = '';
+            let type = '';
+            let minPrice = '';
+            let price = '';
+            let no = 0;
+            //press newBtn and radioBtn
+            document.getElementById("newBtn").addEventListener('click', function () {
+                //assign values
+                manufacturer = document.getElementById("manufacturer").value;
+                type = document.getElementById("type").value;
+                minPrice = document.getElementById("minPrice").value;
+                price = document.getElementById("price").value;
+
+                if (!manufacturer || !type) {
+                    return;
+                }
+                const newShowRow = new function () {
+                    no += 1;
+                    const tagTr = document.createElement('tr');
+                    const tagTd0 = document.createElement('td');
+                    const radioBtn = document.createElement('input');
+                    radioBtn.setAttribute('type', 'radio');
+                    radioBtn.setAttribute('name', 'radio');
+                    radioBtn.setAttribute('id', no);
+                    // 與下方註解寫法比較
+                    radioBtn.addEventListener('click', function () {
+                        const inputArr = this.parentNode.parentNode.childNodes;
+                        document.getElementById("manufacturer").value = inputArr[2].innerHTML;
+                        document.getElementById("type").value = inputArr[3].innerHTML;
+                        document.getElementById("minPrice").value = inputArr[4].innerHTML;
+                        document.getElementById("price").value = inputArr[5].innerHTML;
+                    });
+
+                    tagTd0.appendChild(radioBtn);
+                    tagTr.appendChild(tagTd0);
+                    const tagTd1 = document.createElement('td');
+                    tagTd1.innerHTML = no;
+                    tagTr.appendChild(tagTd1);
+                    const tagTd2 = document.createElement('td');
+                    tagTd2.innerHTML = manufacturer;
+                    tagTr.appendChild(tagTd2);
+                    const tagTd3 = document.createElement('td');
+                    tagTd3.innerHTML = type;
+                    tagTr.appendChild(tagTd3);
+                    const tagTd4 = document.createElement('td');
+                    tagTd4.innerHTML = minPrice;
+                    tagTr.appendChild(tagTd4);
+                    const tagTd5 = document.createElement('td');
+                    tagTd5.innerHTML = price;
+                    tagTr.appendChild(tagTd5);
+                    const tagTd6 = document.createElement('td');
+                    //set deleteBtn
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.setAttribute('type', 'button');
+                    deleteBtn.innerText = '刪除';
+                    deleteBtn.addEventListener('click', function () {
+                        deleteEle = this.parentNode.parentNode;
+                        //get deleteNo
+                        const deleteArr = deleteEle.childNodes;
+                        const deleteNo = deleteArr[1].innerHTML;
+                        //remove deleteEle
+                        outputTable.removeChild(deleteEle);
+                        //reset no
+                        const resetArr = outputTable.childNodes;
+                        let resetEle = [];
+                        for (let i = 2; i < resetArr.length; i++) {
+
+                            resetEle = resetArr[i].childNodes;
+                            resetEle[1].innerHTML = i - 1;
+                            //reset id of radioBtn for update
+                            resetEle[0].id = i - 1;
+                        }
+                        no = resetArr.length - 2;
+                    });
+                    tagTd6.appendChild(deleteBtn);
+                    tagTr.appendChild(tagTd6);
+                    outputTable.appendChild(tagTr);
+                }
+
+
+                // press radioBtn 詢問為何監聽到後會跑多個i
+                // radioArr = document.getElementsByName("radio");
+                // for (let i = 0; i < radioArr.length; i++) {
+                //     radioArr[i].addEventListener('change', function () {
+                //         if (radioArr[i].checked) {
+                //              console.log(i);
+                //             const inputArr = radioArr[i].parentNode.parentNode.childNodes;
+                //             document.getElementById("manufacturer").value = inputArr[2].innerHTML;
+                //             document.getElementById("type").value = inputArr[3].innerHTML;
+                //             document.getElementById("minPrice").value = inputArr[4].innerHTML;
+                //             document.getElementById("price").value = inputArr[5].innerHTML;
+                //         }
+                //     });
+                // }
+            });
+
+            //press cleanBtn
+            document.getElementById("cleanBtn").addEventListener('click', function () {
+                document.getElementById("manufacturer").value = '';
+                document.getElementById("type").value = '';
+                document.getElementById("minPrice").value = '';
+                document.getElementById("price").value = '';
+                outputTable.innerHTML = '<tr><td></td><td>序號</td><td>製造商</td><td>類別</td><td>底價</td><td>售價</td><td></td></tr>'
+                no = 0;
+            });
+
+            //press modifyBtn
+            document.getElementById("modifyBtn").addEventListener('click', function () {
+                //get value in inputTable
+                const radioArr = document.getElementsByName("radio");
+
+                manufacturer = document.getElementById("manufacturer").value;
+                type = document.getElementById("type").value;
+                minPrice = document.getElementById("minPrice").value;
+                price = document.getElementById("price").value;
+
+                let radioInd;
+
+                //find checked row
+                for (let i = 0; i < radioArr.length; i++) {
+                    if (radioArr[i].checked) {
+                        radioInd = i + 1;//since no start from 1 
+                    }
+                }
+                if (radioInd === undefined || !manufacturer || !type) { // if nothing is checked or empty manu/type
+                    return;
+                }
+                //set values in outputTable
+                const radioToUpdate = document.getElementById(radioInd);
+                console.log(radioToUpdate);
+                const tdManufacturer = radioToUpdate.parentNode.nextSibling.nextSibling;
+                const tdType = tdManufacturer.nextSibling;
+                const tdMinPrice = tdType.nextSibling;
+                const tdPrice = tdMinPrice.nextSibling;
+                tdManufacturer.innerHTML = manufacturer;
+                tdType.innerHTML = type;
+                tdMinPrice.innerHTML = minPrice;
+                tdPrice.innerHTML = price;
+            });
+
+
+
+
+
+        }
+    </script>
+</head>
+
+<body>
+    <table border="1" id="input">
+        <tr>
+            <td>製造商</td>
+            <td><input type="text" id="manufacturer"></td>
+            <td>類別</td>
+            <td><input type="text" id="type"></td>
+        </tr>
+        <tr>
+            <td>底價</td>
+            <td><input type="text" id="minPrice"></td>
+            <td>售價</td>
+            <td><input type="text" id="price"></td>
+        </tr>
+        <tr>
+            <td colspan="4">
+                <button type="button" id="newBtn">新增</button>
+                <button type="button" id="modifyBtn">修改</button>
+                <button type="button" id="cleanBtn">清空</button>
+            </td>
+        </tr>
+
+    </table>
+    <br>
+
+    <table border="1" id="output">
+        <tr>
+            <td></td>
+            <td>序號</td>
+            <td>製造商</td>
+            <td>類別</td>
+            <td>底價</td>
+            <td>售價</td>
+            <td></td>
+        </tr>
+    </table>
+</body>
+
+</html>
