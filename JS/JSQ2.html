@@ -44,7 +44,8 @@
                 minPrice = document.getElementById("minPrice").value;
                 price = document.getElementById("price").value;
 
-                if (!manufacturer || !type) {
+                if (!manufacturer.trim() || !type.trim()) {
+                    alert('製造商、類行不得為空或空格，請重新輸入');
                     return;
                 }
                 const newShowRow = new function () {
@@ -55,7 +56,6 @@
                     radioBtn.setAttribute('type', 'radio');
                     radioBtn.setAttribute('name', 'radio');
                     radioBtn.setAttribute('id', no);
-                    // 與下方註解寫法比較
                     radioBtn.addEventListener('click', function () {
                         const inputArr = this.parentNode.parentNode.childNodes;
                         document.getElementById("manufacturer").value = inputArr[2].innerHTML;
@@ -93,16 +93,18 @@
                         const deleteNo = deleteArr[1].innerHTML;
                         //remove deleteEle
                         outputTable.removeChild(deleteEle);
+                        document.getElementById("manufacturer").value = '';
+                        document.getElementById("type").value = '';
+                        document.getElementById("minPrice").value = '';
+                        document.getElementById("price").value = '';
                         //reset no
                         const resetArr = outputTable.childNodes;
                         let resetEle = [];
-                        for (let i = 2; i < resetArr.length; i++) {
-                            resetEle = resetArr[j].childNodes;
-                            console.log(i + ':' + resetEle[0].innerHTML);
-                            resetEle[1].innerHTML = i-1;
+                        for (let i = 1; i < resetArr.length; i++) {
+                            resetEle = resetArr[i].childNodes;
+                            resetEle[1].innerHTML = i;
                             const resetRadio = resetEle[0].childNodes;
-                            resetRadio[0].setAttribute('id', i-1);
-                            console.log(i + 'new:' + resetEle[0].innerHTML);
+                            resetRadio[0].setAttribute('id', i);
                         }
                         no = resetArr.length - 2;
                     });
@@ -134,7 +136,7 @@
                 document.getElementById("type").value = '';
                 document.getElementById("minPrice").value = '';
                 document.getElementById("price").value = '';
-                outputTable.innerHTML = '<tr><td></td><td>序號</td><td>製造商</td><td>類別</td><td>底價</td><td>售價</td><td></td></tr>'
+                outputTable.innerHTML = '<tr><td></td><td>序號</td><td>製造商</td><td>類別</td><td>底價</td><td>售價</td><td></td></tr>';
                 no = 0;
             });
 
@@ -153,15 +155,18 @@
                 //find checked row
                 for (let i = 0; i < radioArr.length; i++) {
                     if (radioArr[i].checked) {
-                        radioInd = i + 1;//since no start from 1 
+                        radioInd = i + 1;
                     }
                 }
-                if (radioInd === undefined || !manufacturer || !type) { // if nothing is checked or empty manu/type
+                if (radioInd === undefined) {
+                    alert('未選取欲修改的資料，請選取後再修改');
+                    return;
+                } else if (!manufacturer.trim() || !type.trim()){
+                    alert('製造商、類行不得為空或空格，請重新輸入');
                     return;
                 }
                 //set values in outputTable
                 const radioToUpdate = document.getElementById(radioInd);
-                console.log(radioToUpdate);
                 const tdManufacturer = radioToUpdate.parentNode.nextSibling.nextSibling;
                 const tdType = tdManufacturer.nextSibling;
                 const tdMinPrice = tdType.nextSibling;
@@ -205,17 +210,7 @@
     </table>
     <br>
 
-    <table border="1" id="output">
-        <tr>
-            <td></td>
-            <td>序號</td>
-            <td>製造商</td>
-            <td>類別</td>
-            <td>底價</td>
-            <td>售價</td>
-            <td></td>
-        </tr>
-    </table>
+    <table border="1" id="output"><tr><td></td><td>序號</td><td>製造商</td><td>類別</td><td>底價</td><td>售價</td><td></td></tr></table>
 </body>
 
 </html>

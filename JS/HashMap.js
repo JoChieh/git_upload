@@ -35,19 +35,21 @@ window.onload = function () {
 
         const newKey = document.getElementById("key").value;
         const newValue = document.getElementById("value").value;
+        
         //not Empty
-        if (!newKey) {
+        if (!newKey.trim()) {
+            alert('Key不得為空或空格，請重新輸入');
             return;
         }
         //not repeated
         if (dataMap.contains(newKey)) {
+            alert('Map內已有重複的key，請重新輸入')
             return;
         }
         dataMap.put(newKey, newValue);
 
         tagArticle.innerHTML = '';
         const tagP = document.createElement('p');
-        const tagBr = document.createElement('br');
         tagP.innerHTML = '【RESULT】';
         tagArticle.appendChild(tagP);
         const keys = dataMap.keys();
