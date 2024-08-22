@@ -113,21 +113,6 @@
                     outputTable.appendChild(tagTr);
                 }
 
-
-                // press radioBtn 詢問為何監聽到後會跑多個i
-                // radioArr = document.getElementsByName("radio");
-                // for (let i = 0; i < radioArr.length; i++) {
-                //     radioArr[i].addEventListener('change', function () {
-                //         if (radioArr[i].checked) {
-                //              console.log(i);
-                //             const inputArr = radioArr[i].parentNode.parentNode.childNodes;
-                //             document.getElementById("manufacturer").value = inputArr[2].innerHTML;
-                //             document.getElementById("type").value = inputArr[3].innerHTML;
-                //             document.getElementById("minPrice").value = inputArr[4].innerHTML;
-                //             document.getElementById("price").value = inputArr[5].innerHTML;
-                //         }
-                //     });
-                // }
             });
 
             //press cleanBtn
@@ -158,7 +143,7 @@
                         radioInd = i + 1;
                     }
                 }
-                if (radioInd === undefined) {
+                if (!radioInd) {
                     alert('未選取欲修改的資料，請選取後再修改');
                     return;
                 } else if (!manufacturer.trim() || !type.trim()){
